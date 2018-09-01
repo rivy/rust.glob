@@ -59,10 +59,8 @@
        html_favicon_url = "https://www.rust-lang.org/favicon.ico",
        html_root_url = "https://doc.rust-lang.org/glob/")]
 #![deny(missing_docs)]
-#![cfg_attr(all(test, windows), feature(std_misc))]
 
 #[allow(unused_imports)]
-use std::ascii::AsciiExt;
 use std::cmp;
 use std::fmt;
 use std::fs;
@@ -174,7 +172,6 @@ pub fn glob_with(pattern: &str, options: &MatchOptions)
 
     #[cfg(windows)]
     fn check_windows_verbatim(p: &Path) -> bool {
-        use std::path::Prefix;
         match p.components().next() {
             Some(Component::Prefix(ref p)) => p.kind().is_verbatim(),
             _ => false,
@@ -1062,13 +1059,9 @@ mod test {
         #[cfg(windows)]
         fn win() {
             use std::env::current_dir;
-            use std::ffi::AsOsStr;
 
             // check windows absolute paths with host/device components
-            let root_with_device = current_dir()
-                                       .ok()
-                                       .and_then(|p| p.prefix().map(|p| p.join("*")))
-                                       .unwrap();
+            let root_with_device = Path::new(current_dir().unwrap().components().next().unwrap().as_os_str()).join("*");
             // FIXME (#9639): This needs to handle non-utf8 paths
             assert!(glob(root_with_device.as_os_str().to_str().unwrap()).unwrap().next().is_some());
         }
